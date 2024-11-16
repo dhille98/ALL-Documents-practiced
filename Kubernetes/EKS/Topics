@@ -1,0 +1,7 @@
+1. Create EKS Cluster
+2. Deploy AWS Load Balancer Controller.
+3. Create a Service with type LoadBalacer and check NLB is deployed.
+4. Create Ingress Service and check ALB Deployed with SSL Termination.
+5. Create testuser01 and provide role mapping.
+6. Deploy Jenkins on the EKS Cluster.
+7. Configure Jenkins Pipeline & execute it.

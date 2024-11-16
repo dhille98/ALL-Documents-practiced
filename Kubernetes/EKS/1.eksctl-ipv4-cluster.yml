@@ -1,0 +1,76 @@
+#Make sure you have deleted old cloudformation stacks before deploying below commands.
+#Dependencies
+Ubuntu 22.04 EC2 Machine
+apt update && apt install -y unzip
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+IAM User with Access and Secret Key with Administator Access
+##Kubectl
+curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo mv ./kubectl /usr/local/bin/kubectl
+chmod 777 /usr/local/bin/kubectl
+kubectl version --short
+##Download eksctl
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+sudo chmod 700 /usr/local/bin/eksctl
+eksctl version
+
+#The below cluster needs 25 mins for creation.
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: k8sb29-cluster-01
+  region: us-east-2
+  version: "1.29"
+
+kubernetesNetworkConfig:
+  ipFamily: IPv4
+addons:
+  - name: vpc-cni
+    version: latest
+  - name: coredns
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+  - name: aws-efs-csi-driver
+    version: latest
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: nodegroup1
+    instanceType: t3.large
+    minSize: 2
+    desiredCapacity: 3
+    maxSize: 4
+    availabilityZones: ["us-east-2a", "us-east-2b", "us-east-2c"]
+    volumeSize: 20
+    ssh:
+      allow: true
+      publicKeyPath: ~/.ssh/id_rsa.pub
+
+#Cluster Creation
+eksctl get cluster --region=us-east-2
+eksctl create cluster -f eksctl-ipv4-cluster.yml &
+eksctl get nodegroups  --cluster=eks-awsb59-cluster-01 --region=us-east-2
+eksctl delete cluster --region=us-east-2 --name=k8sb29-cluster-01 &
+Go to Cloudformation and delete if any pending stacks exists.
+aws sts get-caller-identity
+aws eks update-kubeconfig --region us-east-2 --name eks-awsb59-cluster-01
+kubectl get nodes
+kubectl get pods -A
+ku delete -f Ingress.yml -f deployment.yml
+
+#Jenkins Installation:
+apt update && apt install -y openjdk-11-jdk jq net-tools 
+
+
+
