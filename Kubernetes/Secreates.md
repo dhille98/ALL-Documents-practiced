@@ -41,6 +41,79 @@ kubectl patch ingress bluegreen-ingress-1 --patch-file /tmp/patch.yml
 
 **Registry Secretes**
 
+
+## kubenetes secrertes 
+----------------------
+    -->   TLS
+    --> Registry secrets
+    --> Generic and intergating with aws serets manager with external secret operations 
+
+
+# Lab
+-----
+    * set up on aws/azuer resgity 
+
+```
+    docker push 381491921050.dkr.ecr.ap-south-1.amazonaws.com/school:latest
+```
+    * after push the docker image create deployment 
+```
+     ku create deployment app1 --image 381491921050.dkr.ecr.ap-south-1.amazonaws.com/school:latest --replicas 3 --dry-run -o yaml
+```
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: app1
+  name: app1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app1
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: app1
+    spec:
+      containers:
+      - image: 381491921050.dkr.ecr.ap-south-1.amazonaws.com/school:latest
+        name: school
+        resources: {}
+status: {}
+```
+    * after the create a deployment  comming to this error 
+
+
+NAME                  READY   STATUS             RESTARTS   AGE
+app1-bbf5c756-pxgwz   0/1     ImagePullBackOff   0          5m9s
+app1-bbf5c756-tnvpr   0/1     ImagePullBackOff   0          5m9s
+app1-bbf5c756-w2hd7   0/1     ImagePullBackOff   0          5m9s
+
+    * we need pass the creadtionls 
+# create a secret key with aws rigiry 
+------------------------------------
+```
+    # check the ecr passwd 
+
+    aws ecr get-login-password --region ap-south-1
+    
+    # create secrets ecr
+
+    kubectl create secret docker-registry myecr \
+    --docker-server=381491921050.dkr.ecr.ap-south-1.amazonaws.com \
+    --docker-username=AWS \
+    --docker-password=$(aws ecr get-login-password --region ap-south-1) \
+    --docker-email=k8s@gmail.com
+
+```
+    * you mensiond on yml file this section 
+
+
 * steps: push docker image on ECR, ACR, Docker registry 
 ```
     docker pull sreeharshav/testcontainer:v1

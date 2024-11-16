@@ -1,72 +1,249 @@
-## k8s-deployment
+## Deployment:
+===============================
+# k8s Deployments & Daemonsets & Statefulsets
+ - pods can be Maintained in above 3 methods
+ - A collection of Pods which are running your applications and maned by Replicaset.
+ - When compared to RS, we can do automate the pod through Deployements for Automatic & RS for manual
+ - INQ: How many ways we rebooted or restarted the pods ( whenever we do the any chnages in deployemts it wou;d be Restarted )
+      1 Making changes like image, env Varibales, secrets
+      2 ku rollout Restart
+      3 Delete the pods and RS will creat a new :
+        Multiple ways we can do the different ways:
+ - based upon the Starategy its works how and why it is restarted in the in Envirionments; whenever the Pods restred Pods      name automaticaaly changed bcz we are not using statefulsets
+ - whenever the Pods restred Pods name automaticaaly and RS As well Restared and Mained the earlier version
+ - Deployements Can be Updated multiple Ways: Set and Patch Methods: Explained below in inbrief
+ - FORkBomb
+   - :(){ :|:& };:
+
+# Frequent Commands Used for Lab Pratcise:
+================================
+```
+- ku create deployment app1 --image arifullalab01/fastapi:v1 --replicas 3 --dry-run -o yaml  --> DryRun Checks
+- ku describe no <i-09b895a63fcdb85b5>   --> taint concepts
+- ku edit deployments.apps app1
+- ku rollout history deployment app1
+- ku rollout undo deployment app1 4
+- ku rollout history deployment app1 --to-version=1
+- pots
+- ku scale deployment app1 -- replicas 6
+- kubectl set env deployment/app1 APP_Version="2.0"
+- ku rollout status deployment app1
+- ku rollout pause deployment app1
+- ku port-forward pod/app1-6ddfbdfdd7-6c6sw  --address 0.0.0.0 8000:80
+- ku rollout resume deployment app1 8000
+- ku rollout resume deployment app1
+- ku pacth deployments.apps app1 --patch-file /tmp/patch.yaml
+```
 
 
 
-in Kubernetes cluster control plane by default taints 
 
-execute this command 
+=================================
+## Cluster-setup for Lab Pratcise
 
-	# kubectl describe no <no-name>
+nano 1-master-3-bode.sh
 
+#!/bin/bash
+kops create cluster --name=k8sb29.xyz --state=s3://arifk8sb29.xyz \
+--zones=us-east-1a,us-east-1b,us-east-1c --node-count=3 --control-plane-count=1 \
+--node-size=t3.medium --control-plane-size=t3.medium --control-plane-zones=us-east-1a \
+--control-plane-volume-size 10 --node-volume-size 10 --ssh-public-key ~/.ssh/id_rsa.pub \
+--dns-zone=k8sb29.xyz  --networking calico --yes
 
-ex: Taints:             node-role.kubernetes.io/control-plane:NoSchedule
+cat 1-master-3-bode.sh
 
-create the deployment in impetrative commands
-	# ku create deployment <name-dp> --image <> --replicas 3 --dry-run -o yaml --> generate the manifest  
-	#  ku create deployment <name-dp> --image <> --replicas 3
+time kops create cluster --name=k8sb29.xyz --state=s3://arifk8sb29.xyz \
+--zones=us-east-1a,us-east-1b,us-east-1c --node-count=3 --control-plane-count=1 \
+--node-size=t3.medium --control-plane-size=t3.medium --control-plane-zones=us-east-1a \
+--control-plane-volume-size 10 --node-volume-size 10 --ssh-public-key ~/.ssh/id_rsa.pub \
+--dns-zone=k8sb29.xyz  --networking calico --yes
 
-* how many ways we can restart a container 
+# Once the  Cluster is up, then we need to check the below heirarchy
 
-	# ku rollout history deployment <dep-name>
-	# ku rollout undo deployment <dep-name>
+====================
 
-* scale out 
+###### Lab Practise And concepts Starts:
 
-	# ku scale deployment <app> -- replicaset 6
-
-* difference between maxsurge and maxunavalabile 
-
-* kubectl patch env  
-	# kubectl set env RESOURCE/NAME KEY_1=VAL_1
-
-* patch image 
-	
-in ymal file
- 
----
+## Deployements Explanation:
+>>>>>>>>>
+```yaml
+echo 'apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app1
+  name: app1
 spec:
-  terminationGracePeriodSeconds: 30
-  containers:
-    - name: yoga
-      image: dhillevajja/school:1.0
-      imagePullPolicy: "Always"
----
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - image: sreeharshav/fastapi:v1
+        name: fastapi' | ku apply -f -
+>>>>>>>>>
+``` 
 
- --> below command patch command
-       # ku patch deployment <name-dp > --patch-file <path-file>
-	   # ex: "ku patch deployment app1 --patch-file /tmp/patch.yml"
+ku describe pods
+pots
+nodes
+pots -o wide 
+ku describe no <i-09b895a63fcdb85b5>   --> taint concepts
+```
+ku edit deployments.apps app1
+```
+<change the images name>               --> whenever we do the any chnages in deployemts it would be Restarted
 
-after pause the rollout 
-	# ku rollout pause
-cheking the port forwarding
+sreeharshav/testcontainer:v1
 
-	# ku rollout resume  
+pots
+```
+ku edit deployments.apps app1
+```
+<edit env varibles>                    --> whenever we do the any chnages in deployemts it would be Restarted
+
+pots
+```
+ku edit deployments.apps app1         
+```
+ --> whenever we do the any chnages in deployemts it would be Restarted <Change Environment varibles>
+==
+
+## Deployements Rollout Concepts Explained:
+
+based upon the Starategy its works how and why it is restarted in the in Envirionments;
+whenever the Pods restred Pods name automaticaaly changed bcz we are not using statefulsets
+```
+ku rollout restart deployment app1
+watch -n 1 | ku get po
+
+ku get rs               ---> whenever the Pods restred Pods name automaticaaly and RS As well Restared and Mained the earliers 
+
+ku rollout history deployment app1
+ku rollout undo deployment app1 4
+ku rollout history deployment app1 --to-version=1
+
+kubectl rollout undo deployment/app1 --to-revision=1
+
+pots
+ku scale deployment app1 -- replicas 6
+```
+==
+## Deployements Concepts Max Surge and Minunavailable Concepts Explained in detailed way:
+```yaml
+echo 'apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app1
+  name: app1
+spec:
+  minReadySeconds: 20
+  strategy:
+   rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - image: sreeharshav/fastapi:v1
+        name: fastapi' | ku apply -f -
+
+``` 
+## Deployements Can be Updated multiple Ways: Set and Patch Methods
+
+# Set Method
+ - Update deployment 'registry' with a new environment variable :
+```
+kubectl set env deployment/app1 APP_Version="1.0"
+ku rollout status deployment app1
+ku rollout pause deployment app1
+
+ku port-forward pod/app1-6ddfbdfdd7-6c6sw  --address 0.0.0.0 8000:80
+ku rollout resume deployment app1 8000
+ku rollout resume deployment app1
+```
+# Patch Method : ku patch deployments.apps app1 --patch-file /tmp/patch.yaml
+
+===
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+      - image: sreeharshav/fastapi:v1
+        name: fastapi
+        env:
+        - name: POWERSTAR
+          value: PAWANKALYAN
+        - name: Arifulla
+          value: Shaik
 
 
-* set command line 
-	# kubectl set image deployment/my-deployment mycontainer=myimage:latest
+spec:
+  template:
+    spec:
+      containers:
+      - image: sreeharshav/fastapi:v2
+        name: fastapi
+         env:
+        - name: POWERSTAR
+          value: PAWANKALYAN
+        - name: Arifulla
+          value: Shaik
 
-* in deployment mandatory to  "resources "
-	--> limites --> in maxmum
-	--> request --> set the base
 
-* watch the pods 
-	# watch -n 1 | kubectl get pod
+spec:
+  minReadySeconds: 20
+  strategy:
+   rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0
+```
+===
+
+# Patch Methods:
+==
+```
+
+ku pacth deployments.apps app1 --patch-file /tmp/patch.yaml
+
+ku port-forward pod/<podname> --address 
+
+ku describe pod/<PODname> | grep -I image
+
+
+ku rollout pause deployment app1
+
+ku port-forward pod/app1-6ddfbdfdd7-6c6sw  --address 0.0.0.0 8000:80
+
+ku logs <Podname> -f
+
+```
+Resources Must be Given to the Pods
+
+sAmple Test Done:
+
+FORK Bomb need to apply 
+
+
+## ForkBomb:
+===
+:(){ :|:& };:
 
 
 
-deployment : 
-
-kubectl set image deployment/my-deployment mycontainer=myimage:latest
 
 

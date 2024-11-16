@@ -1,160 +1,58 @@
-# kubernetes storages
+## storage 
+    * pods are state less if incase pod restart are deleted no probulem.
+    * pods are statefull if incase pod restart are deleted data will lose 
 
-    --> Pods are state less if in case pod restart are deleted no Probulams
-   **state less allpications is useing  deployement** 
+# note: 
+     *  in stateless application you can use deployment stage
+
+
+    1) storage 
+    2) statefullset
+
+# storage types 
+    * emptyDir
+    * hostPath
+    * Mount a raw ebs volumes (pv)
+    * creating persistatent Volumes (PVC)
+    * mounting persistatent volumes using persistant volume claims
+    * storage classes
+    * Dynamic Provisioning 
+    * Open EBS
+
+
+# emptyDir
+
+    * creating deployment 
+```
+    kubectl create deployment app1 --image sreeharhav/fastapi:v1 --replicas 3 --dry-run -o yaml
+
+    kubectl expose deployment app1 --port 80 --type NodePort --dry-run -o yaml
+
+```
+    * by create pod by default attached storage on `emotyDir` 
+        --> main.c -- /etc/date
+        --> side.c -- /var/logs 
+    * emoty dir usecase some testing purpose 
+
+    * createing the mysql pods with 3 container with useing NodePort
+    * in pod runs multipule container with on of the container login commands
+```
+    ku exec -it <pod_name> -c <container_name> -- bash
+```
+    * pod or container restart the data will not lose in case delete pod or recreate pod data will be lose
+
+
+# host path
+
+    * host path usecase you can mount on the worker node filesystem
+    * mostly used monitaring 
+      ex: `Deamonsets`
+    * collecting the metrix on the node
+# Q. what is differnt between deployment vs deamonsets 
+------------------------------------------------------
+# Deamonsets:
+    * Deamonsets are used each node request one pod run all the nodes not more the one pod or 
+      lessthen one run pod on node 
+    * if in case node in maintences pods are deleted but deamonsets pods are not be deleted that 
+      time collecting the metrix on pod (delted means cordon).
     
-    for pods are data base like MY Sql / MongoDb / postgress Sql we need to save the date
-
-    1. Storage 
-    2.  State fullset
-## storage Type
-
-1. EmptyDIR
-2. HostPath
-3. Mounting a Raw EBS Volume
-4. creating Present Volumes(Pv) & mounting the presitant Volume using PVC
-5. Storage Classes
-6. Srarage Classes 
-7. Dynamic Provisioning 
-8. Open EBS
-
-
-## EmptyDir
-
-* if you creating a pod by default attached storage on `EmptyDir`
-* thats why if you pod restart data will not lose 
-*  Empty Dir usecase some testing Purpose 
-
-
-![preview](https://1.bp.blogspot.com/-wSVvC_X8sqI/YYFjgajGPSI/AAAAAAAAJEA/F0_2MrX-bzAgwxDM9V7razreZEwwAGVBACLcBGAsYHQ/w400-h266/kubenetes-volume-emptydir.PNG)
-
-**steps**:
-    - create a deployment 
-```
-    kubectl create deployemnt app1 --image sreeharshav/testcontainer:v1 --replicase 3 -o yaml
-```
-    - kubernetes expose serve on 
-```
-    kubectl expose deployment app1 --type NodePort port 80 
-```
-### creating a mysql Pods with 3 container with using Nodeport 
-
-```yaml 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-spec:
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - image: sreeharshav/utils:latest
-        name: utils
-        volumeMounts:
-        - name: sqldata
-          mountPath: /sqldata
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-      - image: adminer:latest
-        name: adminer
-        ports:
-         - containerPort: 8080
-      - image: mysql:8.0
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: "India@123456"
-        ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: sqldata
-          mountPath: /var/lib/mysql
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "500Mi"
-            cpu: "500m"
-      volumes:
-        - name: sqldata
-          emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-spec:
-  type: NodePort
-  ports:
-    - name: mysql
-      protocol: TCP
-      port: 3306
-      targetPort: 3306
-    - name: adminier
-      protocol: TCP
-      port: 8080
-      targetPort: 8080
-  selector:
-    app: mysql
-```
-*   creating multi pod container login with one of the container useing this command 
-
-```
-    kubectl exec --it <pod> -c <container> -- bash
-```
-## HostPath
-
-* host path usecase you can mount on the worker node filesystem 
-* mostly used on Deamon sets `collecting the metrics on pod/node`
-
-**QS. what is different between Deployment and Deamonsets**
-
-    Each Node Requrement one Pod run all the nodes Not a more then one and less then one 
-
-    if incase node in maintences pods are deleted but Demon sets pod are not be deleted 
-
-    that time Deamonset pod run and collecting the metcrics like `cordon`
-
-* sample yaml file
-```yaml
-volumeMounts:
-        - mountPath: /host/sys
-          mountPropagation: HostToContainer
-          name: sys
-          readOnly: true
-        - mountPath: /host/root
-          mountPropagation: HostToContainer
-          name: root
-          readOnly: true
-      volumes:
-      - hostPath:
-          path: /sys
-        name: sys
-      - hostPath:
-          path: /
-        name: root
-      tolerations:  
-      - key: "node-role.kubernetes.io/control-plane"
-        operator: "Equal"
-        effect: "NoSchedule"
-```
-
-
-
-
-
-
