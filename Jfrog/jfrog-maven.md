@@ -44,7 +44,7 @@ set up maven
 		-->  add on properties section below and distribution Management above 
 ```
 
-* create the jforg account and login [login](https://jfrog.io/ui/login/)
+* create the jforg account and login [login](https://dhilli.jfrog.io/ui/login/)
 
 * create the jfog account 
 * step of the artifactory repo
