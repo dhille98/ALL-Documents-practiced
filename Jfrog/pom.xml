@@ -1,0 +1,17 @@
+<distributionManagement>
+    <snapshotRepository>
+        <id>snapshots</id>
+        <name>a0hzr40h0rlqq-artifactory-primary-0-snapshots</name>
+        <url>https://dhilli.jfrog.io/artifactory/maven-libs-snapshot</url>
+    </snapshotRepository>
+</distributionManagement>
+
+
+==========
+<distributionManagement>
+    <repository>
+        <id>central</id>
+        <name>a0hzr40h0rlqq-artifactory-primary-0-releases</name>
+        <url>https://dhilli.jfrog.io/artifactory/maven-libs-release</url>
+    </repository>
+</distributionManagement>
