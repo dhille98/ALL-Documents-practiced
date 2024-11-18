@@ -66,3 +66,67 @@ set up maven
 ![perview](../images/jf-07.png)
 * check the aritifacts on 
 ![perview](../images/jf-08.png)
+
+## Deploy the application JAR File INTO JFROG using Jenkins pipeline 
+
+### Method 1: Using Secret File Credentials in Jenkins Pipeline
+**1.Store the `settings.xml` file as a Secret File in Jenkins:**
+
+  - Go to **Jenkins Dashboard > Manage Jenkins > Manage Credentials**.
+  - Choose the appropriate domain (or create one if needed).
+  - Click on **Add Credentials**.
+  - Select **Secret file** as the type and upload your `settings.xml` file. Give it an ID like `maven-settings-file`.
+**2.Copy the File to the Node in the Jenkins Pipeline:**
+
+  - Use the withCredentials block to access the `settings.xml` file and copy it to the desired location on the node.
+```Jenkinsfile
+pipeline{
+    agent any
+    triggers {
+        pollSCM('* * * * *') // Polls every 15 minutes
+    }
+
+    environment {
+        MAVEN_SETTINGS_CRED_ID = 'maven-settings-file'  // Replace with your credential ID
+    }
+    
+    
+    stages{
+        stage( 'git' ) {
+            steps{
+                git url :' https://github.com/dhille98/spring-petclinic.git ',
+                  branch: 'pod'
+            }
+        }
+         stage('build') {
+             steps {
+                 sh "mvn clean package"
+                 archiveArtifacts artifacts: '**/spring-petclinic-*.jar'
+                 junit testResults: '**/TEST-*.xml'
+             }  
+         }
+
+        stage('Copy settings.xml') {
+            steps {
+                withCredentials([file(credentialsId: "${MAVEN_SETTINGS_CRED_ID}", variable: 'SETTINGS_FILE')]) {
+                    // Copy to .m2 directory on the node
+                    sh 'mkdir -p ~/.m2'
+                    sh 'cp $SETTINGS_FILE ~/.m2/settings.xml || exit 1'
+                }
+            }
+        }
+        stage('deploythe-artifacts-jforg'){
+            steps{
+                sh 'mvn clean deploy -Dskiptest'
+            }
+        }
+    }
+        
+ }
+
+
+```
+**Explanation:**
+
+* **withCredentials:** Provides secure, temporary access to `settings.xml` as **SETTINGS_FILE**.
+* **`sh 'cp $SETTINGS_FILE ~/.m2/settings.xml':`** Copies the `settings.xml` to the `.m2` folder in the user’s home directory on the node.

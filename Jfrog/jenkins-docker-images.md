@@ -9,6 +9,13 @@
 * Configure JFrog CLI as a *Jenkins Tool*section 
 ![perview](../images/jf-12.png)
 
+**key-points**
+	- install `jforg` plugins on jenkins server
+	- jfrog cli configure on `Tools` section give on auoto matically install
+	- give on jforg creadtional `creadtional` sections like jforg `username` and `genarete-key`
+	- in `system configure`on give on `jfrog-url`
+	- in pipeline section give on `tools` name   
+
 * write jenkin file 
 ```Jenkinsfile
 pipeline {
@@ -17,7 +24,7 @@ pipeline {
 		jfrog 'jfrog-cli'
 	}
 	environment {
-		DOCKER_IMAGE_NAME = "dhilli.jfrog.io/<repo-name>/<image-name>"
+		DOCKER_IMAGE_NAME = "dhilli.jfrog.io/<repo-name>/<image-name>:${BUILD_NUMBER}"
 	}
 	stages {
 		stage('Clone') {
@@ -28,15 +35,13 @@ pipeline {
 
 		stage('Build Docker image') {
 			steps {
-				script {
-					docker.build("$DOCKER_IMAGE_NAME", 'docker-oci-examples/docker-example')
-				}
+				sh 'docker image build -t $DOCKER_IMAGE_NAME'
 			}
 		}
 
 		stage('Scan and push image') {
 			steps {
-				dir('docker-oci-examples/docker-example/') {
+				
 					// Scan Docker image for vulnerabilities
 					jf 'docker scan $DOCKER_IMAGE_NAME'
 
@@ -71,10 +76,17 @@ docker push dhilli.jfrog.io/docker-hub-docker-local/<DOCKER_IMAGE>:<DOCKER_TAG>
 
 **Note:** you want to pull the docker image on jfrog repo 
 * `docker pull <artifactory-url>/<repository-key>/<image-name>:<tag>` url means --> *dhilli.jforg.io*
+* like `dhilli.jfrog.io/spc-jenkins-docker/spc:tag`
 * check the image in *artifact>>repo-name> image name*
 
 ![Perview](../images/jf-16.png)
-
+* pipeline is success fully excutations 
+![Perview](../images/jf-17.png)
+* check the docker images on jfrog account 
+![Perview](../images/jf-18.png)
+* scan the docker images on jfrog / check the reports on images
+![Perview](../images/jf-19.png)
+![Perview](../images/jf-20.png)
 ### how to access on Kubernetes on jf account on docker images
 
 * create a secret on k8s cluster 
