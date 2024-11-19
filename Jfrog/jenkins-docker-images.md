@@ -49,7 +49,7 @@ pipeline {
 					jf 'docker push $DOCKER_IMAGE_NAME'
 				}
 			}
-		}
+		
 
 		stage('Publish build info') {
 			steps {
@@ -58,6 +58,7 @@ pipeline {
 		}
 	}
 }
+
 ```
 
 ## docker image push on jfrog on manuvally
@@ -87,6 +88,59 @@ docker push dhilli.jfrog.io/docker-hub-docker-local/<DOCKER_IMAGE>:<DOCKER_TAG>
 * scan the docker images on jfrog / check the reports on images
 ![Perview](../images/jf-19.png)
 ![Perview](../images/jf-20.png)
+
+# store the jar/war file and push the docker image on jfrog server in azure pipeline 
+
+## deploy the jar file
+* create `settings.Xml` file
+* modify the `pom.xml` file
+* in `settings.xml` file store the *secure file* on azure DevOps
+* **Libray** > **variables**> **securefiles**
+
+
+### Step 1: Set Up JFrog Artifactory Account and Docker Repository
+  * **Create a Docker repository** in your JFrog Artifactory account if you haven't done so.
+  * Note the **repository URL**, **username,** and **password** (or an API key) for authentication.
+
+### Step 2: Configure Service Connection in Azure DevOps (Optional)
+  * To avoid including sensitive data directly in your YAML file, create a **Service Connection** in Azure DevOps for JFrog Artifactory.
+  * Go to your Azure DevOps **Project > Project settings > Service connections > New service connection.**
+  * Select **JFrog Artifactory** and provide the **URL, username, and password (or API key)**.
+  * Name the service connection (e.g., `jfrog-service-connection`).
+
+# Notes
+* Ensure that your **JFrog credentials are securely stored** in Azure DevOps (either through a Service Connection or pipeline variables).
+If you do not use a Service Connection, use pipeline variables to securely store your **JFrog URL, username, and password (or API key)**.
+## 1. Use Azure DevOps Library (For Reusability)
+If you plan to use the credentials across multiple pipelines, add them to a Variable Group:
+
+  * Go to **Pipelines > Library > Variable Groups**.
+  * **Click + Variable Group**.
+  * Add variables `(JFROG_URL, JFROG_USER, JFROG_PASSWORD)` and mark sensitive ones as secret.
+## 2. Add Credentials to Azure DevOps (Pipeline Variables)
+**Step 1.1: Navigate to Pipeline Variables**
+ * Go to your **Azure DevOps project**.
+ * Navigate to **Pipelines > Your Pipeline > Edit**.
+ * In the pipeline editor, click on the Variables tab.
+**Step 1.2: Add JFrog Credentials**
+Add the following variables:
+
+  * **JFROG_URL:** Your JFrog Artifactory base URL (e.g., `https://artifactory.example.com`).
+  * **JFROG_USER:** Your `JFrog username`.
+  * **JFROG_PASSWORD:** Your `JFrog API key` or `password` (preferably an API key for better security).
+__Make sure to:__
+
+  * Check the Lock icon to mark `JFROG_PASSWORD` as secret.
+
+### Step 3: Set Up Azure Pipeline YAML
+In your pipeline YAML file, include the following steps:
+
+**1.Log in to JFrog.**
+**2.Build your Docker image.**
+**3.Tag the Docker image.**
+**4.Push the Docker image to JFrog Artifactory.**
+
+* all changes in ci/cd server [Refer Here](https://github.com/dhille98/spring-petclinic.git) pipeline steps
 ### how to access on Kubernetes on jf account on docker images
 
 * create a secret on k8s cluster 
