@@ -26,7 +26,7 @@ Application definitions, configurations, and environments should be declarative 
     kubectl create namespace argocd
     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
  
- 
+ ## arcd cli install
     VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
 
     sudo curl --silent --location -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
@@ -40,6 +40,8 @@ Application definitions, configurations, and environments should be declarative 
     kubectl get pods
     kubectl get svc
 ```
+![Perview](../images/k8s-01.png)
+
 * after checking the svc in k8s 
 * we set up on loadblance this is NLB in service file 
 * setting svc on two types one is `path-file` , `ku edit svc` 
@@ -49,9 +51,13 @@ Application definitions, configurations, and environments should be declarative 
     kubectl port-forward svc/argocd-server --address 0.0.0.0 443:443
     # or 
     kubectl edit svc argocd-server -n argocd # change type: NodePort
+    # or 
+    kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'  # LoadBalancer
+    kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 or 
 ```json
+
 # kubectl patch svc argocd-server -n argocd --patch-file argo_nlb_patch.json
 {
     "metadata": {
@@ -63,6 +69,8 @@ or
         "type": "LoadBalancer" # NodePort
     }
 }
+
+![Preview](../images/k8s-02.png)
 
 ```
 * after creating for login svc check the NLB 

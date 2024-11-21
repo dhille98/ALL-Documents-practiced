@@ -76,9 +76,12 @@ set up maven
   - Choose the appropriate domain (or create one if needed).
   - Click on **Add Credentials**.
   - Select **Secret file** as the type and upload your `settings.xml` file. Give it an ID like `maven-settings-file`.
+
 **2.Copy the File to the Node in the Jenkins Pipeline:**
 
   - Use the withCredentials block to access the `settings.xml` file and copy it to the desired location on the node.
+
+![Perview](../images/jf-21.png)
 ```Jenkinsfile
 pipeline{
     agent any

@@ -60,6 +60,65 @@ pipeline {
 }
 
 ```
+# or push docker image 
+- give that creadtionals on **JFROG** add the **jfrog urls**
+- **mangejenkins> systems > jfrog** that sections add the **jfrg url**
+```
+pipeline {
+    agent any
+    environment {
+        ARTIFACTORY_URL = 'https://<your-artifactory-domain>'
+        ARTIFACTORY_REPO = 'docker-local'
+        DOCKER_REGISTRY = '<your-artifactory-domain>:<port>'
+        DOCKER_IMAGE = 'my-app'
+        IMAGE_TAG = 'latest'
+        CREDENTIALS_ID = 'jfrog-credentials-id' // Replace with Jenkins credential ID for JFrog
+    }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE}:${IMAGE_TAG}")
+                }
+            }
+        }
+        stage('Login to JFrog') {
+            steps {
+                script {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", CREDENTIALS_ID) {
+                        echo 'Logged in to JFrog Docker Registry'
+                    }
+                }
+            }
+        }
+        stage('Tag Docker Image') {
+            steps {
+                script {
+                    sh """
+                    docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh """
+                    docker push ${DOCKER_REGISTRY}/${ARTIFACTORY_REPO}/${DOCKER_IMAGE}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+    }
+    
+}
+
+```
 
 ## docker image push on jfrog on manuvally
 
