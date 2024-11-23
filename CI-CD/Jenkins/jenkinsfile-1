@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+    environment { 
+        tester = 'test'
+    }
+    options {
+        skipDefaultCheckout(true)
+        quietPeriod(10) 
+        timestamps()
+        retry(3)
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch to build')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests after build')
+        choice(name: 'ENVIRONMENT', choices: ['development', 'staging', 'production'], description: 'Environment to deploy to')
+        password(name: 'SECRET_KEY', defaultValue: 'default', description: 'Enter the secret key')
+        file(name: 'CONFIG_FILE', description: 'Upload the configuration file')
+        
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    def buildId = currentBuild.number
+                    echo "Current Build ID: ${buildId}"
+                }
+            }
+        }
+        stage('chekout'){
+            steps {
+                echo "Branch Name: ${params.BRANCH_NAME}"
+                git url: 'https://github.com/dhille98/Jenkins-testing.git', branch: 'main'
+                echo "Current Stage: ${env.STAGE_NAME}"
+            }
+        }
+        stage('stage-1') {
+
+            environment { 
+              Aws_ACCESS_KEY = credentials('secret-key')
+            }
+            steps {
+                echo 'Hello World'
+                sh 'printenv'
+                echo "Current Stage: ${env.STAGE_NAME}"
+            }
+        }
+        stage('Authenticate'){
+            steps{
+                echo "Using Secret Key: ${params.SECRET_KEY}" 
+                echo "Current Stage: ${env.STAGE_NAME}" 
+                echo "Using configuration file: ${params.CONFIG_FILE}"
+            }
+        }
+        stage('Test') {
+            when {
+                expression { params.RUN_TESTS }
+            }
+            steps {
+                echo 'Running tests...'
+                sh 'mvn --version'
+            }
+       }
+       stage('Approval') {
+            steps {
+                script {
+                    input message: 'Approve to proceed?', ok: 'Proceed'
+                }
+            }
+        }
+       stage('deploy'){
+           steps {
+               echo "Deploying to environment ${params.ENVIRONMENT}"
+           }
+       }
+    }
+}

@@ -1,0 +1,10 @@
+@Library(test-libraries) _
+pipeline {
+
+agent any
+
+stage('build') {
+  echo 'Building..'
+  sayHello 'MEGASTAR'
+  }
+}
