@@ -1,5 +1,20 @@
 # HELM Package management 
 
+__Structure of a Helm Chart__
+
+```taxt
+mychart/
+├── Chart.yaml
+├── charts/
+├── templates/
+│   ├── NOTES.txt
+│   ├── _helpers.tpl
+│   ├── deployment.yaml
+│   ├── ingress.yaml
+│   └── service.yaml
+└── values.yaml
+```
+
 * Helm is a package manager for k8s that helps you manage k8s applications through helm charts.
 * This simplifies deployment, versioning and management of applications
 * Installation [Refer Here](https://helm.sh/docs/intro/install/)
@@ -153,3 +168,64 @@ done
     helm install mongodb bitnami/mongodb --set architecture=replicaset --set replicaCount=3 --set persistence.size=2Gi --set useStatefulSet=true --set auth.rootUser=adminsree --set auth.rootPassword="India@123456@" -n mongo --create-namespace
 ```
 **Note:**  in kubernetes any errors frist checking `describe` and checking `logs`
+
+To write a Helm chart that utilizes multiple values files, you can follow a structured approach that allows you to define different configurations for various environments or scenarios. Here’s how to do it effectively:
+
+## Creating Multiple Values Files
+
+1. **Define Your Values Files**: Create multiple YAML files to hold different configurations. For example:
+   - `dev-values.yaml`
+   - `prod-values.yaml`
+   - `staging-values.yaml`
+
+   Each of these files can contain environment-specific settings, such as replica counts, resource limits, or database configurations.
+
+   Example content for `dev-values.yaml`:
+   ```yaml
+   replicaCount: 2
+   image:
+     repository: myapp
+     tag: dev
+   ```
+
+   Example content for `prod-values.yaml`:
+   ```yaml
+   replicaCount: 5
+   image:
+     repository: myapp
+     tag: latest
+   ```
+
+2. **Using the Values Files in Helm Commands**: When installing or upgrading your Helm chart, you can specify multiple values files using the `-f` or `--values` flag. You can include as many files as needed, and Helm will merge them.
+
+   Example command:
+   ```bash
+   helm install my-release ./mychart -f dev-values.yaml -f common-values.yaml
+   ```
+
+   In this command:
+   - `my-release` is the name of your release.
+   - `./mychart` is the path to your Helm chart.
+   - The values from both `dev-values.yaml` and `common-values.yaml` will be merged, with values in later files overriding those in earlier ones.
+
+3. **Accessing Values in Templates**: Within your chart templates, you can access these values using the `.Values` object. For instance:
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: {{ .Release.Name }}
+   spec:
+     replicas: {{ .Values.replicaCount }}
+     template:
+       spec:
+         containers:
+           - name: {{ .Chart.Name }}
+             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+   ```
+
+4. **Best Practices**: 
+   - Keep a base configuration in a `values.yaml` file for common settings.
+   - Use environment-specific files to override only the necessary values.
+   - Document the purpose of each values file for clarity.
+
+
