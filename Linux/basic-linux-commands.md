@@ -2,7 +2,7 @@
 
 **file:** is a command which used to what type file are like on `TXT` OR `JPG`
 
-**Ping** is a coomand which is used to Ping host and output results
+**Ping** is a command which is used to Ping host and output results
 
 **dig <domain>** is a command which is used to Get DNS information for domain
 
@@ -35,3 +35,7 @@
 **locate**
 
 * The locate command is a Unix utility used to find files and directories quickly. The command is a more convenient and efficient alternative to the find command, which is aggressive and takes longer to complete the search.
+
+**awk**
+
+**sed**
