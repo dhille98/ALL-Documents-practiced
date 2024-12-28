@@ -1,6 +1,6 @@
 ## Deployment:
 ===============================
-# k8s Deployments & Daemonsets & Statefulsets
+ -  **k8s Deployments & Daemonsets & Statefulsets**
  - pods can be Maintained in above 3 methods
  - A collection of Pods which are running your applications and maned by Replicaset.
  - When compared to RS, we can do automate the pod through Deployements for Automatic & RS for manual
@@ -17,28 +17,24 @@
 
 # Frequent Commands Used for Lab Pratcise:
 ================================
+```sh
+  ku create deployment app1 --image arifullalab01/fastapi:v1 --replicas 3 --dry-run -o yaml  --> DryRun Checks
+  ku describe no <i-09b895a63fcdb85b5>   --> taint concepts
+  ku edit deployments.apps app1
+  ku rollout history deployment app1
+  ku rollout undo deployment app1 4
+  ku rollout history deployment app1 --to-version=1
+  pots
+  ku scale deployment app1 -- replicas 6
+  kubectl set env deployment/app1 APP_Version="2.0"
+  ku rollout status deployment app1
+  ku rollout pause deployment app1
+  ku port-forward pod/app1-6ddfbdfdd7-6c6sw  --address 0.0.0.0 8000:80
+  ku rollout resume deployment app1 8000
+  ku rollout resume deployment app1
+  ku pacth deployments.apps app1 --patch-file /tmp/patch.yaml
 ```
-- ku create deployment app1 --image arifullalab01/fastapi:v1 --replicas 3 --dry-run -o yaml  --> DryRun Checks
-- ku describe no <i-09b895a63fcdb85b5>   --> taint concepts
-- ku edit deployments.apps app1
-- ku rollout history deployment app1
-- ku rollout undo deployment app1 4
-- ku rollout history deployment app1 --to-version=1
-- pots
-- ku scale deployment app1 -- replicas 6
-- kubectl set env deployment/app1 APP_Version="2.0"
-- ku rollout status deployment app1
-- ku rollout pause deployment app1
-- ku port-forward pod/app1-6ddfbdfdd7-6c6sw  --address 0.0.0.0 8000:80
-- ku rollout resume deployment app1 8000
-- ku rollout resume deployment app1
-- ku pacth deployments.apps app1 --patch-file /tmp/patch.yaml
-```
 
-
-
-
-=================================
 ## Cluster-setup for Lab Pratcise
 
 nano 1-master-3-bode.sh
@@ -97,7 +93,7 @@ ku describe no <i-09b895a63fcdb85b5>   --> taint concepts
 ```
 ku edit deployments.apps app1
 ```
-<change the images name>               --> whenever we do the any chnages in deployemts it would be Restarted
+<change the images name>            --> whenever we do the any changes in deployemts it would be Restarted
 
 sreeharshav/testcontainer:v1
 
@@ -105,13 +101,13 @@ pots
 ```
 ku edit deployments.apps app1
 ```
-<edit env varibles>                    --> whenever we do the any chnages in deployemts it would be Restarted
+<edit env varibles>                    --> whenever we do the any changes in deployemts it would be Restarted
 
 pots
 ```
 ku edit deployments.apps app1         
 ```
- --> whenever we do the any chnages in deployemts it would be Restarted <Change Environment varibles>
+ --> whenever we do the any changes in deployemts it would be Restarted <Change Environment varibles>
 ==
 
 ## Deployements Rollout Concepts Explained:

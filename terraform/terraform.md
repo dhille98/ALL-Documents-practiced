@@ -172,3 +172,28 @@ Subcommands:
 
 * This allows you to specify resource attributes that Terraform should ignore during the apply. It can be helpful when you want Terraform to manage certain aspects of a resource but not others.
 * For example, ignoring the tags field if you’re manually updating it outside of Terraform.
+
+**Summary of Lifecycle Arguments:**
+    - **create_before_destroy:** Create the new resource before destroying the old one.
+    - **prevent_destroy:** Prevent the resource from being destroyed.
+    - **ignore_changes:** Ignore changes to specific resource attributes.
+    - **replace_triggered_by:** Trigger replacement of a resource when certain other resources change.
+
+
+## terraform state
+
+* terraform state maintaining actvally state and desired state 
+* actvally state means is `.tf` files 
+* desired state means `terraform.state` file 
+
+* store state file to remote backend 
+* don not update/delete the file 
+* state locking
+* isolation of state file 
+* regular backup
+---
+    s3 bucket
+    azure blob storage 
+    GCP storing A/C
+
+* 
