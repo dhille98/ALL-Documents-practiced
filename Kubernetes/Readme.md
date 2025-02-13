@@ -22,3 +22,12 @@
     - kubeproxy
 
 
+## Learning processs 
+
+- Kubernetes archtecher
+- create a cluster
+- pods
+- replicaset
+- replica-controller 
+- Label
+- 
