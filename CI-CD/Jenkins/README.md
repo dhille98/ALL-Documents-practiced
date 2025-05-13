@@ -1,7 +1,7 @@
 # Jenkins-testing
 Jenkins pipeline starchers
 ===========================
-[Refer Here](https://www.jenkins.io/doc/book/pipeline/syntax/) Jekins pipeline starchers 
+[Refer Here](https://www.jenkins.io/doc/book/pipeline/syntax/) Jenkins pipeline starchers 
 
  sections 
 ----------
